@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+import sys
 import datetime
 import subprocess
 
@@ -71,6 +72,15 @@ def rsync(*kargs):
 
 def do_backup():
     for bkp in BACKUPS:
+        # check source
+        if not os.path.isdir(bkp["src"]):
+            print "skipping missing directory:", bkp["src"]
+            continue
+
+        if not len(os.listdir(bkp["src"])):
+            print "skipping empty directory:", bkp["src"]
+            continue
+
         oldies = find_old(bkp)
         dest = format_name(bkp)
         os.mkdir(dest)
