@@ -75,12 +75,22 @@ def do_backup():
         dest = format_name(bkp)
         os.mkdir(dest)
 
+        # rsync args are either tuple or string
+        # make list of strings
+        rsync_args = bkp["rsync_args"]
+        if isinstance(rsync_args, basestring):
+            rsync_args = [rsync_args]
+        else:
+            rsync_args = list(rsync_args)
+
+        rsync_args.append(bkp["src"])
         # do the backup
         if oldies:
             print "found last directory:", oldies[-1]
-            ret = rsync(bkp["rsync_args"], bkp["src"], "--link-dest=%s" % oldies[-1], dest)
-        else:
-            ret = rsync(bkp["rsync_args"], bkp["src"], dest)
+            rsync_args.append("--link-dest=%s" % oldies[-1])
+
+        rsync_args.append(dest)
+        rsync(*rsync_args)
 
         # erase old backups
         if bkp.has_key("copies"):
